@@ -1,266 +1,73 @@
-# Banking Sales Data Warehouse – End-to-End ETL Project
+# Banking Data Mart (Informatica)
 
-## 📌 Project Overview
+## 1️⃣ Objective
 
-This project demonstrates the design and implementation of an **end-to-end Banking Sales Data Warehouse** using **Oracle** as the target database and **Informatica PowerCenter** for ETL.
-
-The focus of this project is **data modeling correctness, ETL robustness, and real-world tradeoffs**, rather than tool-heavy or tutorial-style implementation.
-
-The warehouse is designed to support analytical questions around:
-
-* Customer transaction behavior
-* Account balance evolution
-* Investment patterns
-* Branch-level financial performance
+Build an end-to-end **Data Mart** using **Informatica PowerCenter** with proper dimensional modeling, SCD handling, and incremental loads.
 
 ---
 
-## 🧱 Source Data
+## 2️⃣ Data Sources & Notes
 
-The project is based on three operational source tables loaded into a **Staging Layer (STG)**:
-
-### 1️⃣ STG_BANK
-
-Stores branch-level geographic and financial data.
-
-* One row per branch
-* No historical tracking in source
-
-Key columns:
-
-* BRANCH_ID
-* CITY
-* REGION
-* FIRM_REVENUE
-* EXPENSES
-* PROFIT_MARGIN
+* Bank, Customer, and Transaction relational tables
+* One customer record represents **one account**
+* Account balance changes per transaction
+* Incremental load based on **Transaction_ID**
 
 ---
 
-### 2️⃣ STG_CUSTOMER
+## 3️⃣ Data Model
 
-Stores customer-account related information.
+* **Star Schema**
+* Fact grain: **1 transaction × 1 account × 1 date × 1 branch**
+* Dimensions: Customer (SCD2), Branch (SCD1), Date, Account Type, Investment Type
 
-* Each row represents **one customer account**
-* Assumption: one account per customer in source system
-
-Key columns:
-
-* CUSTOMER_ID
-* AGE
-* CUSTOMER_TYPE
-* CITY
-* REGION
-* BANK_NAME
-* BRANCH_ID
+📷 *Star Schema Diagram*
 
 ---
 
-### 3️⃣ STG_TRANSACTION
+## 4️⃣ ETL Architecture
 
-Stores transactional activity.
+* Source → Staging → Dimensions → Fact
+* Surrogate keys, data quality rules, SCD logic
+* Incremental fact loading
 
-* One row per transaction
-* Contains both transactional and account-related attributes
-
-Key columns:
-
-* TRANSACTION_ID
-* CUSTOMER_ID
-* ACCOUNT_TYPE
-* TRANSACTION_AMOUNT
-* TRANSACTION_DATE
-* TOTAL_BALANCE
-* INVESTMENT_AMOUNT
-* INVESTMENT_TYPE
+📷 *ETL Architecture Diagram*
 
 ---
 
-## ⭐ Data Warehouse Design
+## 5️⃣ Data Lineage
 
-### 🎯 Fact Grain Definition
+* High-level and column-level lineage from source to fact
 
-Before modeling, the fact grain was explicitly defined:
-
-> **1 row in FACT_TRANSACTION = 1 transaction performed by 1 account on 1 date at 1 branch**
-
-This grain decision drives all downstream modeling and ETL logic.
+📷 *Lineage Diagrams*
 
 ---
 
-### 🧩 Fact Tables
+## 6️⃣ Informatica Implementation
 
-#### 1️⃣ FACT_TRANSACTION (Transactional Fact)
+* Dimension & fact workflows
+* Lookup-based SCD handling
 
-Captures atomic transaction events.
-
-Measures:
-
-* TRANSACTION_AMOUNT
-* INVESTMENT_AMOUNT
-* TOTAL_BALANCE (balance *after* transaction)
-
-Foreign Keys:
-
-* CUSTOMER_SK
-* BRANCH_SK
-* ACCOUNT_TYPE_SK
-* INVESTMENT_TYPE_SK
-* DATE_KEY
-
-Loading Strategy:
-
-* Incremental load based on **TRANSACTION_ID (high-water mark)**
+📷 *Workflow & SCD Mapping Images*
 
 ---
 
-### 📊 Dimensions
+## 7️⃣ Reporting
 
-#### DIM_CUSTOMER (SCD Type 2)
-
-Tracks historical changes in customer/account attributes.
-
-Tracked changes:
-
-* CUSTOMER_TYPE
-* CITY
-* REGION
-* BRANCH_ID
-
-Key features:
-
-* SURROGATE KEY (CUSTOMER_SK)
-* IS_CURRENT flag
-* EFFECTIVE_FROM / EFFECTIVE_TO dates
+* Customer behavior analysis
+* Branch performance
+* Investment insights
 
 ---
 
-#### DIM_BRANCH (SCD Type 1)
+## 🛠 Tech Stack
 
-Stores current branch attributes only.
-
-Reasoning:
-
-* No historical requirement provided for branch financials
-* Overwrite changes is acceptable
+**Informatica PowerCenter | SQL Server | Oracle | Star Schema**
 
 ---
 
-#### DIM_ACCOUNT_TYPE
+If you want, I can now:
 
-Static reference dimension.
-
-Examples:
-
-* Savings
-* Current
-* Business
-
----
-
-#### DIM_INVESTMENT_TYPE
-
-Static reference dimension.
-
-Examples:
-
-* Fixed Deposit
-* Mutual Funds
-
----
-
-#### DIM_DATE
-
-Standard calendar dimension.
-
-Granularity:
-
-* One row per day
-
-Attributes include:
-
-* Day, Month, Quarter, Year
-* Day name
-* Weekend flag
-
----
-
-## 🔄 ETL Architecture
-
-### 🔹 Staging Layer
-
-* Basic data quality checks
-* NULL handling using default values
-* No business logic applied
-
----
-
-### 🔹 Dimension Load
-
-| Dimension           | Strategy           |
-| ------------------- | ------------------ |
-| DIM_BRANCH          | SCD Type 1         |
-| DIM_CUSTOMER        | SCD Type 2         |
-| DIM_ACCOUNT_TYPE    | Full load / static |
-| DIM_INVESTMENT_TYPE | Full load / static |
-| DIM_DATE            | Pre-generated      |
-
----
-
-### 🔹 Fact Load
-
-Fact loading steps:
-
-1. Filter new transactions using **MAX(TRANSACTION_ID)** from FACT table
-2. Lookup surrogate keys from dimensions
-3. Handle late-arriving dimensions using default SKs
-4. Insert only new transaction rows
-
----
-
-## 🧠 Key Design Decisions & Tradeoffs
-
-* TOTAL_BALANCE stored in FACT_TRANSACTION because it changes per transaction
-* No daily snapshot fact implemented to avoid over-engineering
-* Investment attributes modeled as dimensions to avoid duplication
-* No custom audit tables (Informatica metadata is sufficient)
-
----
-
-## 🛠️ Tools & Technologies
-
-* Oracle Database
-* Informatica PowerCenter
-* SQL
-* Dimensional Modeling (Kimball methodology)
-
----
-
-## 📈 Use Cases Enabled
-
-* Customer transaction behavior analysis
-* Balance vs transaction activity analysis
-* Investment distribution by account type
-* Branch performance comparison
-
----
-
-## 🚀 Future Enhancements
-
-* Add daily account snapshot fact
-* Add data quality metrics
-* Add reconciliation checks
-* Implement CDC-based incremental loading
-
----
-
-## 👤 Author
-
-**Mahmoud Ehelaly**
-Aspiring Data Engineer | ETL & Data Warehousing
-
----
-
-## 💬 Feedback
-
-Feedback and suggestions are welcome. This project is designed as a learning and portfolio artifact with real-world engineering considerations.
+* ✨ Write a **2-line LinkedIn post**
+* 🎯 Prepare **interview explanation (60 seconds)**
+* 📐 Fix diagram titles so they look enterprise-grade
