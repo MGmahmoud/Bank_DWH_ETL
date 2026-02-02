@@ -21,19 +21,19 @@ Build an end-to-end **Data Mart** using **Informatica PowerCenter** with proper 
 * Fact grain: **1 transaction × 1 customer × 1 date × 1 branch**
 * Dimensions: Customer (SCD2), Branch (SCD1), Date, Account Type, Investment Type
 
----<img width="1064" height="893" alt="03_Data Model" src="https://github.com/user-attachments/assets/3e60b039-4a5c-49c3-9c74-c2e58b9b9e6b" />
+<img width="1064" height="893" alt="03_Data Model" src="https://github.com/user-attachments/assets/3e60b039-4a5c-49c3-9c74-c2e58b9b9e6b" />
 
 
 ## 4️⃣ Architecture
 
----<img width="942" height="782" alt="01_High Level Architecture" src="https://github.com/user-attachments/assets/3d2a4ea2-8d7d-4dc2-bf13-5ce7a908fbdb" />
+<img width="942" height="782" alt="01_High Level Architecture" src="https://github.com/user-attachments/assets/3d2a4ea2-8d7d-4dc2-bf13-5ce7a908fbdb" />
 
 
 ## 5️⃣ Data Lineage
 
 * High-level lineage from source to fact
 
----<img width="912" height="742" alt="02_Data Flow" src="https://github.com/user-attachments/assets/678ead09-a420-48e0-aad0-e0970e3bb2b7" />
+<img width="912" height="742" alt="02_Data Flow" src="https://github.com/user-attachments/assets/678ead09-a420-48e0-aad0-e0970e3bb2b7" />
 
 ## 6️⃣ Informatica Implementation
 
@@ -55,3 +55,11 @@ Build an end-to-end **Data Mart** using **Informatica PowerCenter** with proper 
 
 **Informatica PowerCenter | Oracle**
 
+## 👤 Author
+
+**Mahmoud Ehelaly**
+Data Engineer | ETL & Data Warehousing
+
+## 💬 Feedback
+
+Feedback and suggestions are welcome. This project is designed as a learning and portfolio artifact with real-world engineering considerations.
