@@ -1,4 +1,4 @@
-# Banking Data Mart (Informatica)
+# Banking DWH ETL (Informatica)
 
 ## 1️⃣ Objective
 
